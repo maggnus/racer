@@ -14,12 +14,12 @@ export class CollectionCounter {
   };
 
   get(collectionName: string, id: string) {
-    var collection = this.collections[collectionName];
+    const collection = this.collections[collectionName];
     return (collection && collection.counts[id]) || 0;
   };
 
   increment(collectionName: string, id: string) {
-    var collection = this.collections[collectionName];
+    let collection = this.collections[collectionName];
     if (!collection) {
       collection = this.collections[collectionName] = new CounterMap();
       this.size++;
@@ -28,9 +28,9 @@ export class CollectionCounter {
   };
 
   decrement(collectionName: string, id: string) {
-    var collection = this.collections[collectionName];
+    const collection = this.collections[collectionName];
     if (!collection) return 0;
-    var count = collection.decrement(id);
+    const count = collection.decrement(id);
     if (collection.size < 1) {
       delete this.collections[collectionName];
       this.size--;
@@ -41,8 +41,8 @@ export class CollectionCounter {
   toJSON() {
     // Serialize to the contained count data if any
     if (this.size > 0) {
-      var out = {};
-      for (var collectionName in this.collections) {
+      const out = {};
+      for (const collectionName in this.collections) {
         out[collectionName] = this.collections[collectionName].counts;
       }
       return out;
@@ -61,7 +61,7 @@ export class CounterMap {
   }
 
   increment(key: string): number {
-    var count = this.counts[key] || 0;
+    const count = this.counts[key] || 0;
     if (count === 0) {
       this.size++;
     }
@@ -69,7 +69,7 @@ export class CounterMap {
   };
 
   decrement(key: string): number {
-    var count = this.counts[key] || 0;
+    const count = this.counts[key] || 0;
     if (count > 1) {
       return this.counts[key] = count - 1;
     }

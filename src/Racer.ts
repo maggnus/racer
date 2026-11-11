@@ -13,7 +13,7 @@ export class Racer extends EventEmitter {
   }
 
   createModel(data) {
-    var model = new RootModel();
+    const model = new RootModel();
     if (data) {
       model.createConnection(data);
       model.unbundle(data);

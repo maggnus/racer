@@ -17,7 +17,7 @@ describe('EventMapTree', function() {
       var previous = tree.setListener([], listener1);
       expect(previous).equal(null);
       expect(tree.getListener([])).equal(listener1);
-      var previous = tree.setListener([], listener2);
+      previous = tree.setListener([], listener2);
       expect(previous).equal(listener1);
       expect(tree.getListener([])).equal(listener2);
       expect(tree.children).equal(null);

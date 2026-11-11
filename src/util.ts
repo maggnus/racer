@@ -2,6 +2,19 @@
 /** @private */
 export const deepEqual = require('fast-deep-equal');
 
+/**
+ * Creates a random (version 4) UUID, like `crypto.randomUUID()`, which is
+ * not available in browsers on pages that are not served over a secure
+ * connection.
+ */
+export function uuid(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 /** 
  * Checks process.title is not equal to 'browser'
  * 
@@ -14,7 +27,7 @@ export const isServer = process.title !== 'browser';
 
 /** @private */
 export function asyncGroup(cb) {
-  var group = new AsyncGroup(cb);
+  const group = new AsyncGroup(cb);
   return function asyncGroupAdd() {
     return group.add();
   };
@@ -66,7 +79,7 @@ export function castSegments(segments: Readonly<Array<string | number>>) {
 
 /** @private */
 export function contains(segments, testSegments) {
-  for (var i = 0; i < segments.length; i++) {
+  for (let i = 0; i < segments.length; i++) {
     if (segments[i] !== testSegments[i]) return false;
   }
   return true;
@@ -85,9 +98,9 @@ export function copy(value) {
 
 /** @private */
 export function copyObject(object) {
-  var out = new object.constructor();
-  for (var key in object) {
-    if (object.hasOwnProperty(key)) {
+  const out = new object.constructor();
+  for (const key in object) {
+    if (Object.hasOwn(object, key)) {
       out[key] = object[key];
     }
   }
@@ -100,15 +113,15 @@ export function deepCopy(value) {
   if (typeof value === 'object') {
     if (value === null) return null;
     if (Array.isArray(value)) {
-      var array: any[] = [];
-      for (var i = value.length; i--;) {
+      const array: any[] = [];
+      for (let i = value.length; i--;) {
         array[i] = deepCopy(value[i]);
       }
       return array;
     }
-    var object = new value.constructor();
-    for (var key in value) {
-      if (value.hasOwnProperty(key)) {
+    const object = new value.constructor();
+    for (const key in value) {
+      if (Object.hasOwn(value, key)) {
         object[key] = deepCopy(value[key]);
       }
     }
@@ -124,7 +137,7 @@ export function equal(a, b) {
 
 /** @private */
 export function equalsNaN(x) {
-  // eslint-disable-next-line no-self-compare
+   
   return x !== x;
 }
 
@@ -137,7 +150,7 @@ export function isArrayIndex(segment: string): boolean {
 export function lookup(segments: string[], value: unknown): unknown {
   if (!segments) return value;
 
-  for (var i = 0, len = segments.length; i < len; i++) {
+  for (let i = 0, len = segments.length; i < len; i++) {
     if (value == null) return value;
     value = value[segments[i]];
   }
@@ -146,7 +159,7 @@ export function lookup(segments: string[], value: unknown): unknown {
 
 /** @private */
 export function mayImpactAny(segmentsList: string[][], testSegments: string[]) {
-  for (var i = 0, len = segmentsList.length; i < len; i++) {
+  for (let i = 0, len = segmentsList.length; i < len; i++) {
     if (mayImpact(segmentsList[i], testSegments)) return true;
   }
   return false;
@@ -154,8 +167,8 @@ export function mayImpactAny(segmentsList: string[][], testSegments: string[]) {
 
 /** @private */
 export function mayImpact(segments: string[], testSegments: string[]): boolean {
-  var len = Math.min(segments.length, testSegments.length);
-  for (var i = 0; i < len; i++) {
+  const len = Math.min(segments.length, testSegments.length);
+  for (let i = 0; i < len; i++) {
     if (segments[i] !== testSegments[i]) return false;
   }
   return true;
@@ -163,7 +176,7 @@ export function mayImpact(segments: string[], testSegments: string[]): boolean {
 
 /** @private */
 export function mergeInto(to, from) {
-  for (var key in from) {
+  for (const key in from) {
     to[key] = from[key];
   }
   return to;
@@ -176,13 +189,13 @@ export function promisify<T = void>(original) {
   }
 
   function fn() {
-    var promiseResolve, promiseReject;
-    var promise = new Promise<T>(function(resolve, reject) {
+    let promiseResolve, promiseReject;
+    const promise = new Promise<T>(function(resolve, reject) {
       promiseResolve = resolve;
       promiseReject = reject;
     });
 
-    var args = Array.prototype.slice.apply(arguments);
+    const args = Array.prototype.slice.apply(arguments);
     args.push(function(err: Error, value: T) {
       if (err) {
         promiseReject(err);
@@ -225,7 +238,7 @@ export function serverRequire(module, id) {
  */
 export function serverUse(module, id: string, options?: unknown) {
   if (!isServer) return this;
-  var plugin = module.require(id);
+  const plugin = module.require(id);
   return this.use(plugin, options);
 }
 
@@ -240,7 +253,7 @@ type Plugin<T extends {}, O> = (pluginHost: T, options: O) => void;
  */
 export function use<T extends {}, O>(this: T, plugin: Plugin<T, O>, options?: O) {
   // Don't include a plugin more than once
-  var plugins = (this as any)._plugins || ((this as any)._plugins = []);
+  const plugins = (this as any)._plugins || ((this as any)._plugins = []);
   if (plugins.indexOf(plugin) === -1) {
     plugins.push(plugin);
     plugin(this, options);

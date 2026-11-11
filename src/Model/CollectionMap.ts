@@ -10,17 +10,17 @@ export class CollectionMap{
   }
 
   getCollection(collectionName) {
-    var collection = this.collections[collectionName];
+    const collection = this.collections[collectionName];
     return (collection && collection.values);
   };
 
   get(collectionName, id) {
-    var collection = this.collections[collectionName];
+    const collection = this.collections[collectionName];
     return (collection && collection.values[id]);
   };
 
   set(collectionName, id, value) {
-    var collection = this.collections[collectionName];
+    let collection = this.collections[collectionName];
     if (!collection) {
       collection = this.collections[collectionName] = new FastMap();
     }
@@ -28,7 +28,7 @@ export class CollectionMap{
   };
 
   del(collectionName, id) {
-    var collection = this.collections[collectionName];
+    const collection = this.collections[collectionName];
     if (collection) {
       collection.del(id);
       if (collection.size > 0) return;

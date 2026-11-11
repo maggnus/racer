@@ -18,7 +18,7 @@ export class Doc {
   }
 
   path(segments?: Path[]) {
-    var path = this.collectionName + '.' + this.id;
+    let path = this.collectionName + '.' + this.id;
     if (segments && segments.length) path += '.' + segments.join('.');
     return path;
   };

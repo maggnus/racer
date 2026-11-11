@@ -1,9 +1,8 @@
-import { v4 as uuidv4 } from 'uuid';
 import { type Context } from './contexts';
 import { RacerBackend } from '../Backend';
 import { type Connection } from './connection';
 import { type ModelData } from './collections';
-import { Primitive } from '../types';
+import { uuid } from '../util';
 
 export type UUID = string;
 
@@ -47,12 +46,12 @@ export class Model<T = DefualtType> {
   static INITS: ModelInitFunction[] = [];
 
   ChildModel = ChildModel;
-  debug: DebugOptions;
-  root: RootModel;
-  data: T;
+  declare debug: DebugOptions;
+  declare root: RootModel;
+  declare data: T;
 
-  _at: string;
-  _context: Context;
+  declare _at: string;
+  declare _context: Context;
   /**
    * Optional "event context" tag applied to event listeners registered using this model, allowing
    * `removeContextListeners` to later remove all listeners with this model's "event context".
@@ -63,12 +62,12 @@ export class Model<T = DefualtType> {
    *
    * Note that this has nothing to do with `model._context`.
    */
-  _eventContext: string | null;
-  _events: [];
-  _maxListeners: number;
-  _pass: any;
-  _preventCompose: boolean;
-  _silent: boolean;
+  declare _eventContext: string | null;
+  declare _events: [];
+  declare _maxListeners: number;
+  declare _pass: any;
+  declare _preventCompose: boolean;
+  declare _silent: boolean;
 
   /**
    * Creates a new Racer UUID
@@ -76,7 +75,7 @@ export class Model<T = DefualtType> {
    * @returns a new Racer UUID.
    * */
   id(): UUID {
-    return uuidv4();
+    return uuid();
   }
 
   _child() {
@@ -94,9 +93,9 @@ export class RootModel extends Model<ModelData> {
   constructor(options: ModelOptions = {}) {
     super();
     this.root = this;
-    var inits = Model.INITS;
+    const inits = Model.INITS;
     this.debug = options.debug || {};
-    for (var i = 0; i < inits.length; i++) {
+    for (let i = 0; i < inits.length; i++) {
       inits[i](this, options);
     }
   }

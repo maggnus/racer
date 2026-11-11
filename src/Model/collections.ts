@@ -3,11 +3,12 @@ import { Model, RootModel } from './Model';
 import { JSONObject } from 'sharedb/lib/sharedb';
 import type { Path, ReadonlyDeep, ShallowCopiedValue, Segments } from '../types';
 
-var LocalDoc = require('./LocalDoc');
-var util = require('../util');
+const LocalDoc = require('./LocalDoc');
+const util = require('../util');
 
+/** Dictionary of collection name to collection */
 export class ModelCollections {
-  docs: Record<string, any>;
+  [collectionName: string]: Collection<any>;
 }
 
 /** Root model data */
@@ -127,12 +128,12 @@ Model.prototype.getCollection = function(collectionName) {
 };
 
 Model.prototype.getDoc = function(collectionName, id) {
-  var collection = this.root.collections[collectionName];
+  const collection = this.root.collections[collectionName];
   return collection && collection.docs[id];
 };
 
 Model.prototype.get = function<S>(subpath?: Path) {
-  var segments = this._splitPath(subpath);
+  const segments = this._splitPath(subpath);
   return this._get(segments) as ReadonlyDeep<S>;
 };
 
@@ -141,22 +142,22 @@ Model.prototype._get = function(segments) {
 };
 
 Model.prototype.getCopy = function<S>(subpath?: Path) {
-  var segments = this._splitPath(subpath);
+  const segments = this._splitPath(subpath);
   return this._getCopy(segments) as ReadonlyDeep<S>;
 };
 
 Model.prototype._getCopy = function(segments) {
-  var value = this._get(segments);
+  const value = this._get(segments);
   return util.copy(value);
 };
 
 Model.prototype.getDeepCopy = function<S>(subpath?: Path) {
-  var segments = this._splitPath(subpath);
+  const segments = this._splitPath(subpath);
   return this._getDeepCopy(segments) as S;
 };
 
 Model.prototype._getDeepCopy = function(segments) {
-  var value = this._get(segments);
+  const value = this._get(segments);
   return util.deepCopy(value);
 };
 
@@ -172,15 +173,15 @@ Model.prototype.getValues = function<S>(subpath?: Path) {
 }
 
 Model.prototype.getOrCreateCollection = function(name) {
-  var collection = this.root.collections[name];
+  let collection = this.root.collections[name];
   if (collection) return collection;
-  var Doc = this._getDocConstructor(name);
+  const Doc = this._getDocConstructor(name);
   collection = new Collection(this.root, name, Doc);
   this.root.collections[name] = collection;
   return collection;
 };
 
-Model.prototype._getDocConstructor = function(name: string) {
+Model.prototype._getDocConstructor = function(_name: string) {
   // Only create local documents. This is overriden in ./connection.js, so that
   // the RemoteDoc behavior can be selectively included
   return LocalDoc;
@@ -195,7 +196,7 @@ Model.prototype._getDocConstructor = function(name: string) {
  * @param {Object} [data] data to create if doc with id does not exist in collection
  */
 Model.prototype.getOrCreateDoc = function(collectionName, id, data) {
-  var collection = this.getOrCreateCollection(collectionName);
+  const collection = this.getOrCreateCollection(collectionName);
   return collection.getOrCreateDoc(id, data);
 };
 
@@ -203,7 +204,7 @@ Model.prototype.getOrDefault = function<S>(subpath: Path, defaultValue: S) {
   return this.get(subpath) ?? defaultValue as ReadonlyDeep<S>;
 };
 
-Model.prototype.getOrThrow = function<S>(subpath?: Path) {
+Model.prototype.getOrThrow = function(subpath?: Path) {
   const value = this.get(subpath);
   if (value == null) {
     const fullpath = this.path(subpath);
@@ -216,9 +217,9 @@ Model.prototype.getOrThrow = function<S>(subpath?: Path) {
  * @param {String} subpath
  */
 Model.prototype.destroy = function(subpath) {
-  var segments = this._splitPath(subpath);
+  const segments = this._splitPath(subpath);
   // Silently remove all types of listeners within subpath
-  var silentModel = this.silent();
+  const silentModel = this.silent();
   silentModel._removeAllListeners(null, segments);
   silentModel._removeAllRefs(segments);
   silentModel._stopAll(segments);
@@ -231,13 +232,13 @@ Model.prototype.destroy = function(subpath) {
     this.root.collections = new ModelCollections();
     // Delete each property of data instead of creating a new object so that
     // it is possible to continue using a reference to the original data object
-    var data = this.root.data;
-    for (var key in data) {
+    const data = this.root.data;
+    for (const key in data) {
       delete data[key];
     }
   } else if (segments.length === 1) {
-    var collection = this.getCollection(segments[0]);
-    collection && collection.destroy();
+    const collection = this.getCollection(segments[0]);
+    if (collection) collection.destroy();
   } else {
     silentModel._del(segments);
   }
@@ -267,7 +268,7 @@ export class Collection<T extends JSONObject = {}> {
    * @return {LocalDoc|RemoteDoc} doc
    */
   add(id, data) {
-    var doc = new this.Doc(this.model, this.name, id, data, this);
+    const doc = new this.Doc(this.model, this.name, id, data, this);
     this.docs[id] = doc;
     return doc;
   };
@@ -278,7 +279,7 @@ export class Collection<T extends JSONObject = {}> {
   };
   
   getOrCreateDoc(id, data) {
-    var doc = this.docs[id];
+    const doc = this.docs[id];
     if (doc) return doc;
     this.size++;
     return this.add(id, data);

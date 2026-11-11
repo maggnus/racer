@@ -1,5 +1,9 @@
+// The server-only modules are loaded with `serverRequire`, which hides them from bundlers. The
+// references keep their type augmentations in the generated declarations.
+/* eslint-disable @typescript-eslint/triple-slash-reference */
 /// <reference path="./bundle.ts" preserve="true" />
 /// <reference path="./connection.server.ts" preserve="true" />
+/* eslint-enable @typescript-eslint/triple-slash-reference */
 
 import { serverRequire } from '../util';
 export { Model, ChildModel, RootModel, type ModelOptions, type UUID, type DefualtType } from './Model';

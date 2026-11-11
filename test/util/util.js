@@ -11,7 +11,7 @@ describe('util', function() {
 
     it('merges an empty object with a populated object', () => {
       var fn = function(x) {
-        return x++;
+        return x + 1;
       };
       var a = {};
       var b = {x: 's', y: [1, 3], fn: fn};
@@ -20,7 +20,7 @@ describe('util', function() {
 
     it('merges a populated object with a populated object', () => {
       var fn = function(x) {
-        return x++;
+        return x + 1;
       };
       var a = {x: 's', y: [1, 3], fn: fn};
       var b = {x: 7, z: {}};
@@ -53,12 +53,13 @@ describe('util', function() {
         });
       };
       var promisedFn = util.promisify(targetFn);
+      let error;
       try {
         await promisedFn(3);
-        fail('Expected promisedFn to reject, but it successfully resolved');
-      } catch (error) {
-        expect(error).to.have.property('message', 'Error 3');
+      } catch (e) {
+        error = e;
       }
+      expect(error, 'Expected promisedFn to reject').to.have.property('message', 'Error 3');
     });
 
     it('wrapped functions throw on thrown error', async () => {
@@ -66,12 +67,13 @@ describe('util', function() {
         throw new Error(`Error ${num}`);
       };
       var promisedFn = util.promisify(targetFn);
+      let error;
       try {
         await promisedFn(3);
-        fail('Expected promisedFn to reject, but it successfully resolved');
-      } catch (error) {
-        expect(error).to.have.property('message', 'Error 3');
+      } catch (e) {
+        error = e;
       }
+      expect(error, 'Expected promisedFn to reject').to.have.property('message', 'Error 3');
     });
   });
 

@@ -62,7 +62,7 @@ declare module './Model' {
      * @see https://derbyjs.github.io/derby/models/refs
      */
     ref<S>(path: PathLike, to: Refable, options?: RefOptions): ChildModel<S>;
-    _ref<T>(from: Segments, to: Segments, options?: RefOptions): void;
+    _ref(from: Segments, to: Segments, options?: RefOptions): void;
 
     /**
      * Removes a model reference.
@@ -87,7 +87,7 @@ declare module './Model' {
 
 
 Model.INITS.push(function(model) {
-  var root = model.root;
+  const root = model.root;
   root._refs = new Refs();
   addIndexListeners(root);
   addListener(root, 'changeImmediate', refChange);
@@ -100,25 +100,25 @@ Model.INITS.push(function(model) {
 
 function addIndexListeners(model) {
   model.on('insertImmediate', function refInsertIndex(segments, event) {
-    var index = event.index;
-    var howMany = event.values.length;
+    const index = event.index;
+    const howMany = event.values.length;
     function patchInsert(refIndex) {
       return (index <= refIndex) ? refIndex + howMany : refIndex;
     }
     onIndexChange(segments, patchInsert);
   });
   model.on('removeImmediate', function refRemoveIndex(segments, event) {
-    var index = event.index;
-    var howMany = event.values.length;
+    const index = event.index;
+    const howMany = event.values.length;
     function patchRemove(refIndex) {
       return (index <= refIndex) ? refIndex - howMany : refIndex;
     }
     onIndexChange(segments, patchRemove);
   });
   model.on('moveImmediate', function refMoveIndex(segments, event) {
-    var from = event.from;
-    var to = event.to;
-    var howMany = event.howMany;
+    const from = event.from;
+    const to = event.to;
+    const howMany = event.howMany;
     function patchMove(refIndex) {
       // If the index was moved itself
       if (from <= refIndex && refIndex < from + howMany) {
@@ -133,13 +133,13 @@ function addIndexListeners(model) {
     onIndexChange(segments, patchMove);
   });
   function onIndexChange(segments, patch) {
-    var toListeners = model._refs.toListeners;
-    var refs = toListeners.getDescendantListeners(segments);
-    for (var i = 0; i < refs.length; i++) {
-      var ref = refs[i];
+    const toListeners = model._refs.toListeners;
+    const refs = toListeners.getDescendantListeners(segments);
+    for (let i = 0; i < refs.length; i++) {
+      const ref = refs[i];
       if (!ref.updateIndices) continue;
-      var index = +ref.toSegments[segments.length];
-      var patched = patch(index);
+      const index = +ref.toSegments[segments.length];
+      const patched = patch(index);
       if (index === patched) continue;
       toListeners.removeListener(ref.toSegments, ref);
       ref.toSegments[segments.length] = '' + patched;
@@ -150,12 +150,12 @@ function addIndexListeners(model) {
 }
 
 function refChange(model, dereferenced, event, segments) {
-  var value = event.value;
+  const value = event.value;
   // Detect if we are deleting vs. setting to undefined
   if (value === undefined) {
-    var parentSegments = segments.slice();
-    var last = parentSegments.pop();
-    var parent = model._get(parentSegments);
+    const parentSegments = segments.slice();
+    const last = parentSegments.pop();
+    const parent = model._get(parentSegments);
     if (!parent || !(last in parent)) {
       model._del(dereferenced);
       return;
@@ -182,35 +182,35 @@ function refMove(model, dereferenced, event) {
 function addListener(model, type, fn) {
   model.on(type, refListener);
   function refListener(segments, event) {
-    var passed = event.passed;
+    const passed = event.passed;
     // Find cases where an event is emitted on a path where a reference
     // is pointing. All original mutations happen on the fully dereferenced
     // location, so this detection only needs to happen in one direction
-    var node = model._refs.toListeners;
-    for (var i = 0; i < segments.length; i++) {
-      var segment = segments[i];
+    let node = model._refs.toListeners;
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
       node = node.children && node.children.values[segment];
       if (!node) return;
       // If a ref is found pointing to a matching subpath, re-emit on the
       // place where the reference is coming from as if the mutation also
       // occured at that path
-      var refs = node.listeners;
+      let refs = node.listeners;
       if (!refs) continue;
 
       // Shallow clone refs in case a ref is removed while going through
       // the loop
       refs = refs.slice();
-      var remaining = segments.slice(i + 1);
-      for (var refIndex = 0; refIndex < refs.length; refIndex++) {
-        var ref = refs[refIndex];
-        var dereferenced = ref.fromSegments.concat(remaining);
+      const remaining = segments.slice(i + 1);
+      for (let refIndex = 0; refIndex < refs.length; refIndex++) {
+        const ref = refs[refIndex];
+        const dereferenced = ref.fromSegments.concat(remaining);
         // The value may already be up to date via object reference. If so,
         // simply re-emit the event. Otherwise, perform the same mutation on
         // the ref's path
         if (model._get(dereferenced) === model._get(segments)) {
           model._emitMutation(dereferenced, event);
         } else {
-          var setterModel = model.pass(passed);
+          const setterModel = model.pass(passed);
           setterModel._dereference = noopDereference;
           fn(setterModel, dereferenced, event, segments);
         }
@@ -218,13 +218,13 @@ function addListener(model, type, fn) {
     }
     // If a ref points to a child of a matching subpath, get the value in
     // case it has changed and set if different
-    var refs = node.getOwnDescendantListeners();
-    for (var i = 0; i < refs.length; i++) {
-      var ref = refs[i];
-      var value = model._get(ref.toSegments);
-      var previous = model._get(ref.fromSegments);
+    const refs = node.getOwnDescendantListeners();
+    for (let i = 0; i < refs.length; i++) {
+      const ref = refs[i];
+      const value = model._get(ref.toSegments);
+      const previous = model._get(ref.fromSegments);
       if (previous !== value) {
-        var setterModel = model.pass(passed);
+        const setterModel = model.pass(passed);
         setterModel._dereference = noopDereference;
         setterModel._set(ref.fromSegments, value);
       }
@@ -237,7 +237,7 @@ Model.prototype._canRefTo = function(value) {
 };
 
 Model.prototype.ref = function() {
-  var from, to, options;
+  let from, to, options;
   // to could be pathlike, model, query, or filter 
   if (arguments.length === 1) {
     to = arguments[0];
@@ -254,12 +254,12 @@ Model.prototype.ref = function() {
     to = arguments[1];
     options = arguments[2];
   }
-  var fromPath = this.path(from);
-  var toPath = this.path(to);
+  const fromPath = this.path(from);
+  const toPath = this.path(to);
   // Make ref to reffable object, such as query or filter
   if (!toPath) return to.ref(fromPath);
-  var fromSegments = fromPath.split('.');
-  var toSegments = toPath.split('.');
+  const fromSegments = fromPath.split('.');
+  const toSegments = toPath.split('.');
   if (fromSegments.length < 2) {
     throw new Error('ref must be performed under a collection ' +
       'and document id. Invalid path: ' + fromPath);
@@ -271,14 +271,14 @@ Model.prototype.ref = function() {
 Model.prototype._ref = function(fromSegments, toSegments, options) {
   this.root._refs.remove(fromSegments);
   this.root._refLists.remove(fromSegments);
-  var value = this._get(toSegments);
+  const value = this._get(toSegments);
   this._set(fromSegments, value);
-  var ref = new Ref(fromSegments, toSegments, options);
+  const ref = new Ref(fromSegments, toSegments, options);
   this.root._refs.add(ref);
 };
 
 Model.prototype.removeRef = function(subpath) {
-  var segments = this._splitPath(subpath);
+  const segments = this._splitPath(subpath);
   this._removeRef(segments);
 };
 Model.prototype._removeRef = function(segments) {
@@ -288,7 +288,7 @@ Model.prototype._removeRef = function(segments) {
 };
 
 Model.prototype.removeAllRefs = function(subpath) {
-  var segments = this._splitPath(subpath);
+  const segments = this._splitPath(subpath);
   this._removeAllRefs(segments);
 };
 Model.prototype._removeAllRefs = function(segments) {
@@ -297,35 +297,35 @@ Model.prototype._removeAllRefs = function(segments) {
 };
 
 Model.prototype.dereference = function(subpath) {
-  var segments = this._splitPath(subpath);
+  const segments = this._splitPath(subpath);
   return this._dereference(segments).join('.');
 };
 
 Model.prototype._dereference = function(segments, forArrayMutator, ignore) {
   if (segments.length === 0) return segments;
-  var doAgain;
+  let doAgain;
   do {
-    var refsNode = this.root._refs.fromMap;
-    var refListsNode = this.root._refLists.fromMap;
+    let refsNode = this.root._refs.fromMap;
+    let refListsNode = this.root._refLists.fromMap;
     doAgain = false;
-    for (var i = 0, len = segments.length; i < len; i++) {
+    for (let i = 0, len = segments.length; i < len; i++) {
       // @TODO: resolve type for Segments
-      var segment = segments[i] as string;
+      const segment = segments[i] as string;
 
       refsNode = refsNode && refsNode.children && refsNode.children.values[segment];
-      var ref = refsNode && refsNode.listener;
+      const ref = refsNode && refsNode.listener;
       if (ref) {
-        var remaining = segments.slice(i + 1);
+        const remaining = segments.slice(i + 1);
         segments = ref.toSegments.concat(remaining);
         doAgain = true;
         break;
       }
 
       refListsNode = refListsNode && refListsNode.children && refListsNode.children.values[segment];
-      var refList = refListsNode && refListsNode.listener;
+      const refList = refListsNode && refListsNode.listener;
       if (refList && refList !== ignore) {
-        var belowDescendant = i + 2 < len;
-        var belowChild = i + 1 < len;
+        const belowDescendant = i + 2 < len;
+        const belowChild = i + 1 < len;
         if (!(belowDescendant || forArrayMutator && belowChild)) continue;
         segments = refList.dereference(segments, i);
         doAgain = true;
@@ -374,23 +374,23 @@ export class Refs {
   };
   
   remove(segments) {
-    var ref = this.fromMap.deleteListener(segments);
+    const ref = this.fromMap.deleteListener(segments);
     if (!ref) return;
     this.toListeners.removeListener(ref.toSegments, ref);
   };
   
   removeAll(segments) {
-    var node = this.fromMap.deleteAllListeners(segments);
+    const node = this.fromMap.deleteAllListeners(segments);
     if (node) {
       node.forEach(node => this._removeInputListeners(node));
     }
   };
   
   toJSON() {
-    var out = [];
+    const out = [];
     this.fromMap.forEach(function(ref) {
-      var from = ref.fromSegments.join('.');
-      var to = ref.toSegments.join('.');
+      const from = ref.fromSegments.join('.');
+      const to = ref.toSegments.join('.');
       out.push([from, to]);
     });
     return out;

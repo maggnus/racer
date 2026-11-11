@@ -65,7 +65,7 @@ declare module './Model' {
 }
 
 Model.prototype._splitPath = function(subpath?: PathLike): string[] {
-  var path = this.path(subpath);
+  const path = this.path(subpath);
   return (path && path.split('.')) || [];
 };
 
@@ -91,7 +91,7 @@ Model.prototype.isPath = function(subpath?: PathLike): boolean {
 
 Model.prototype.scope = function<S>(path?: PathLike): ChildModel<S> {
   if (arguments.length > 1) {
-    for (var i = 1; i < arguments.length; i++) {
+    for (let i = 1; i < arguments.length; i++) {
       path = path + '.' + arguments[i];
     }
   }
@@ -113,16 +113,16 @@ Model.prototype.scope = function<S>(path?: PathLike): ChildModel<S> {
  */
 Model.prototype.at = function(subpath?: Path) {
   if (arguments.length > 1) {
-    for (var i = 1; i < arguments.length; i++) {
+    for (let i = 1; i < arguments.length; i++) {
       subpath = subpath + '.' + arguments[i];
     }
   }
-  var path = this.path(subpath);
+  const path = this.path(subpath);
   return createScoped(this, path);
 };
 
 function createScoped(model, path) {
-  var scoped = model._child();
+  const scoped = model._child();
   scoped._at = path;
   return scoped;
 }
@@ -137,9 +137,9 @@ function createScoped(model, path) {
  */
 Model.prototype.parent = function(levels) {
   if (levels == null) levels = 1;
-  var segments = this._splitPath();
-  var len = Math.max(0, segments.length - levels);
-  var path = segments.slice(0, len).join('.');
+  const segments = this._splitPath();
+  const len = Math.max(0, segments.length - levels);
+  const path = segments.slice(0, len).join('.');
   return this.scope(path);
 };
 
@@ -151,6 +151,6 @@ Model.prototype.parent = function(levels) {
  */
 Model.prototype.leaf = function(path) {
   if (!path) path = this.path();
-  var i = path.lastIndexOf('.');
+  const i = path.lastIndexOf('.');
   return path.slice(i + 1);
 };

@@ -67,7 +67,7 @@ Model.INITS.push(function(model) {
 });
 
 Model.prototype.context = function(contextId) {
-  var model = this._child();
+  const model = this._child();
   model.setContext(contextId);
   return model;
 };
@@ -77,21 +77,21 @@ Model.prototype.setContext = function(contextId) {
 };
 
 Model.prototype.getOrCreateContext = function(contextId) {
-  var context = this.root._contexts[contextId] ||
+  const context = this.root._contexts[contextId] ||
     (this.root._contexts[contextId] = new Context(this, contextId));
   return context;
 };
 
 Model.prototype.unload = function(contextId) {
-  var context = (contextId) ? this.root._contexts[contextId] : this._context;
-  context && context.unload();
+  const context = (contextId) ? this.root._contexts[contextId] : this._context;
+  if (context) context.unload();
 };
 
 Model.prototype.unloadAll = function() {
-  var contexts = this.root._contexts;
-  for (var key in contexts) {
+  const contexts = this.root._contexts;
+  for (const key in contexts) {
     const currentContext = contexts[key];
-    if (contexts.hasOwnProperty(key)) {
+    if (Object.hasOwn(contexts, key)) {
       currentContext.unload();
     }
   }
@@ -99,9 +99,9 @@ Model.prototype.unloadAll = function() {
 
 export class Contexts {
   toJSON() {
-    var out: Record<string, any> = {};
-    var contexts = this;
-    for (var key in contexts) {
+    const out: Record<string, any> = {};
+    const contexts = this;
+    for (const key in contexts) {
       const currentContext = contexts[key];
       if (currentContext instanceof Context) {
         out[key] = currentContext.toJSON();
@@ -134,9 +134,9 @@ export class Context {
   }
 
   toJSON() {
-    var fetchedDocs = this.fetchedDocs.toJSON();
-    var subscribedDocs = this.subscribedDocs.toJSON();
-    var createdDocs = this.createdDocs.toJSON();
+    const fetchedDocs = this.fetchedDocs.toJSON();
+    const subscribedDocs = this.subscribedDocs.toJSON();
+    const createdDocs = this.createdDocs.toJSON();
     if (!fetchedDocs && !subscribedDocs && !createdDocs) return;
     return {
       fetchedDocs: fetchedDocs,
@@ -174,36 +174,36 @@ export class Context {
   };
 
   unload() {
-    var model = this.model;
-    for (var hash in this.fetchedQueries) {
-      var query = model.root._queries.map[hash];
+    const model = this.model;
+    for (const hash in this.fetchedQueries) {
+      const query = model.root._queries.map[hash];
       if (!query) continue;
-      var count = this.fetchedQueries[hash];
+      let count = this.fetchedQueries[hash];
       while (count--) query.unfetch();
     }
-    for (var hash in this.subscribedQueries) {
-      var query = model.root._queries.map[hash];
+    for (const hash in this.subscribedQueries) {
+      const query = model.root._queries.map[hash];
       if (!query) continue;
-      var count = this.subscribedQueries[hash];
+      let count = this.subscribedQueries[hash];
       while (count--) query.unsubscribe();
     }
-    for (var collectionName in this.fetchedDocs.collections) {
-      var collection = this.fetchedDocs.collections[collectionName];
-      for (var id in collection.counts) {
-        var count = collection.counts[id];
+    for (const collectionName in this.fetchedDocs.collections) {
+      const collection = this.fetchedDocs.collections[collectionName];
+      for (const id in collection.counts) {
+        let count = collection.counts[id];
         while (count--) model.unfetchDoc(collectionName, id);
       }
     }
-    for (var collectionName in this.subscribedDocs.collections) {
-      var collection = this.subscribedDocs.collections[collectionName];
-      for (var id in collection.counts) {
-        var count = collection.counts[id];
+    for (const collectionName in this.subscribedDocs.collections) {
+      const collection = this.subscribedDocs.collections[collectionName];
+      for (const id in collection.counts) {
+        let count = collection.counts[id];
         while (count--) model.unsubscribeDoc(collectionName, id);
       }
     }
-    for (var collectionName in this.createdDocs.collections) {
-      var collection = this.createdDocs.collections[collectionName];
-      for (var id in collection.counts) {
+    for (const collectionName in this.createdDocs.collections) {
+      const collection = this.createdDocs.collections[collectionName];
+      for (const id in collection.counts) {
         model._maybeUnloadDoc(collectionName, id);
       }
     }
@@ -214,6 +214,6 @@ function mapIncrement(map, key) {
   map[key] = (map[key] || 0) + 1;
 }
 function mapDecrement(map, key) {
-  map[key] && map[key]--;
+  if (map[key]) map[key]--;
   if (!map[key]) delete map[key];
 }

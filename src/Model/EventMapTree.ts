@@ -28,10 +28,10 @@ export class EventMapTree {
    */
   destroy() {
     // For all non-root nodes, remove the reference to the node
-    var parent = this.parent;
+    const parent = this.parent;
     if (parent) {
       // Remove reference to this node from its parent
-      var children = parent.children;
+      const children = parent.children;
       if (children) {
         children.del(this.segment);
         if (children.size > 0) return;
@@ -55,11 +55,11 @@ export class EventMapTree {
    * @return {EventMapTree|undefined}
    */
   _getChild(segments: Segments) {
-    var node = this;
-    for (var i = 0, len = segments.length; i < len; i++) {
-      var children = node.children;
+    let node = this;
+    for (let i = 0, len = segments.length; i < len; i++) {
+      const children = node.children;
       if (!children) return;
-      var segment = segments[i];
+      const segment = segments[i];
       node = children.values[segment];
       if (!node) return;
     }
@@ -74,14 +74,14 @@ export class EventMapTree {
    * @return {EventMapTree}
    */
   _getOrCreateChild(segments: Segments) {
-    var node: EventMapTree = this;
-    for (var i = 0, len = segments.length; i < len; i++) {
-      var children = node.children;
+    let node: EventMapTree = this;
+    for (let i = 0, len = segments.length; i < len; i++) {
+      let children = node.children;
       if (!children) {
         children = node.children = new FastMap();
       }
-      var segment = segments[i];
-      var next = children.values[segment];
+      const segment = segments[i];
+      const next = children.values[segment];
       if (next) {
         node = next;
       } else {
@@ -101,8 +101,8 @@ export class EventMapTree {
    * @return {*} previous
    */
   setListener(segments: Segments, listener) {
-    var node = this._getOrCreateChild(segments);
-    var previous = node.listener;
+    const node = this._getOrCreateChild(segments);
+    const previous = node.listener;
     node.listener = listener;
     return previous;
   };
@@ -114,9 +114,9 @@ export class EventMapTree {
    * @return {*} previous
    */
   deleteListener(segments: Segments) {
-    var node = this._getChild(segments);
+    const node = this._getChild(segments);
     if (!node) return;
-    var previous = node.listener;
+    const previous = node.listener;
     node.listener = null;
     if (!node.children) {
       node.destroy();
@@ -132,7 +132,7 @@ export class EventMapTree {
    * @return {EventMapTree}
    */
   deleteAllListeners(segments: Segments) {
-    var node = this._getChild(segments);
+    const node = this._getChild(segments);
     if (node) {
       node.destroy();
     }
@@ -146,7 +146,7 @@ export class EventMapTree {
    * @return {*} listeners
    */
   getListener(segments: Segments) {
-    var node = this._getChild(segments);
+    const node = this._getChild(segments);
     return (node) ? node.listener : null;
   };
 
@@ -160,8 +160,8 @@ export class EventMapTree {
    * @return {Array} listeners
    */
   getAffectedListeners(segments) {
-    var listeners = [];
-    var node = pushAncestorListeners(listeners, segments, this);
+    const listeners = [];
+    const node = pushAncestorListeners(listeners, segments, this);
     if (node) {
       pushDescendantListeners(listeners, node);
     }
@@ -203,10 +203,10 @@ function pushListener(listeners, node) {
  */
 function pushAncestorListeners(listeners, segments, node) {
   pushListener(listeners, node);
-  for (var i = 0, len = segments.length; i < len; i++) {
-    var children = node.children;
+  for (let i = 0, len = segments.length; i < len; i++) {
+    const children = node.children;
     if (!children) return;
-    var segment = segments[i];
+    const segment = segments[i];
     node = children.values[segment];
     if (!node) return;
     pushListener(listeners, node);
@@ -223,9 +223,9 @@ function pushAncestorListeners(listeners, segments, node) {
  */
 function pushDescendantListeners(listeners, node) {
   if (!node.children) return;
-  var values = node.children.values;
-  for (var key in values) {
-    var child = values[key];
+  const values = node.children.values;
+  for (const key in values) {
+    const child = values[key];
     pushListener(listeners, child);
     pushDescendantListeners(listeners, child);
   }
@@ -238,7 +238,7 @@ function pushDescendantListeners(listeners, node) {
  * @param {Function} callback
  */
 function forListener(node, callback) {
-  var listener = node.listener;
+  const listener = node.listener;
   if (listener != null) {
     callback(listener);
   }
@@ -253,9 +253,9 @@ function forListener(node, callback) {
  */
 function forDescendantListeners(node, callback) {
   if (!node.children) return;
-  var values = node.children.values;
-  for (var key in values) {
-    var child = values[key];
+  const values = node.children.values;
+  for (const key in values) {
+    const child = values[key];
     forListener(child, callback);
     forDescendantListeners(child, callback);
   }

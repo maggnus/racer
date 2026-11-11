@@ -1,5 +1,5 @@
 import * as path from 'path';
-import * as util from './util';
+import * as util from './util';
 import { type ModelOptions, RootModel } from './Model/Model';
 import Backend = require('sharedb');
 
@@ -22,7 +22,7 @@ export class RacerBackend extends Backend {
     this.racer = racer;
     this.modelOptions = options && options.modelOptions;
     this.on('bundle', function (browserify) {
-      var racerPath = path.join(__dirname, 'index.js');
+      const racerPath = path.join(__dirname, 'index.js');
       browserify.require(racerPath, { expose: 'racer' });
     });
   }
@@ -40,7 +40,7 @@ export class RacerBackend extends Backend {
         util.mergeInto(options, this.modelOptions) :
         this.modelOptions;
     }
-    var model = new RootModel(options);
+    const model = new RootModel(options);
     this.emit('model', model);
     model.createConnection(this, request);
     return model;
@@ -53,7 +53,7 @@ export class RacerBackend extends Backend {
    * @returns an Express middleware function
    */
   modelMiddleware() {
-    var backend = this;
+    const backend = this;
     function modelMiddleware(req, res, next) {
       // Do not add a model to the request if one has been added already
       if (req.model) return next();
@@ -76,4 +76,3 @@ export class RacerBackend extends Backend {
   };
 }
 
-function getModelUndefined() { }

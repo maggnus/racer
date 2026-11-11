@@ -1,6 +1,5 @@
 import { Racer } from './Racer';
 import * as util from './util';
-import type { ShareDBOptions } from 'sharedb';
 
 export { type RacerBackend, type BackendOptions } from './Backend';
 import { RootModel } from './Model';
@@ -32,7 +31,7 @@ export const racer = new Racer();
  * @returns RootModel
  */
 export function createModel(data?) {
-  var model = new RootModel();
+  const model = new RootModel();
   if (data) {
     model.createConnection(data);
     model.unbundle(data);

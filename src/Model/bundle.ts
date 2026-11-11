@@ -1,6 +1,6 @@
 import { Model } from './Model';
-var defaultType = require('sharedb/lib/client').types.defaultType;
-var promisify = require('../util').promisify;
+const defaultType = require('sharedb/lib/client').types.defaultType;
+const promisify = require('../util').promisify;
 
 declare module './Model' {
   interface Model {
@@ -17,10 +17,10 @@ Model.INITS.push(function(model, options) {
 });
 
 Model.prototype.bundle = function(cb) {
-  var root = this.root;
-  var timeout = setTimeout(function() {
-    var message = 'Model bundle took longer than ' + root.bundleTimeout + 'ms';
-    var err = new Error(message);
+  const root = this.root;
+  const timeout = setTimeout(function() {
+    const message = 'Model bundle took longer than ' + root.bundleTimeout + 'ms';
+    const err = new Error(message);
     cb(err);
     // Keep the callback from being called more than once
     cb = function() {};
@@ -28,7 +28,7 @@ Model.prototype.bundle = function(cb) {
 
   root.whenNothingPending(function finishBundle() {
     clearTimeout(timeout);
-    var bundle = {
+    const bundle = {
       collections: undefined,
       queries: root._queries.toJSON(),
       contexts: root._contexts.toJSON(),
@@ -48,7 +48,7 @@ Model.prototype.bundle = function(cb) {
 Model.prototype.bundlePromised = promisify(Model.prototype.bundle);
 
 function stripComputed(root) {
-  var silentModel = root.silent();
+  const silentModel = root.silent();
   root._refLists.fromMap.forEach(function(refList) {
     silentModel._del(refList.fromSegments);
   });
@@ -63,14 +63,14 @@ function stripComputed(root) {
 }
 
 function serializeCollections(root) {
-  var out = {};
-  for (var collectionName in root.collections) {
-    var collection = root.collections[collectionName];
+  const out = {};
+  for (const collectionName in root.collections) {
+    const collection = root.collections[collectionName];
     out[collectionName] = {};
-    for (var id in collection.docs) {
-      var doc = collection.docs[id];
-      var shareDoc = doc.shareDoc;
-      var snapshot;
+    for (const id in collection.docs) {
+      const doc = collection.docs[id];
+      const shareDoc = doc.shareDoc;
+      let snapshot;
       if (shareDoc) {
         if (shareDoc.type == null && shareDoc.version == null) {
           snapshot = undefined;

@@ -6,9 +6,9 @@ import { ModelData } from '.';
 import type { Doc as ShareDBDoc } from 'sharedb';
 import type { RemoteDoc } from './RemoteDoc';
 
-var defaultType = require('sharedb/lib/client').types.defaultType;
-var util = require('../util');
-var promisify = util.promisify;
+const defaultType = require('sharedb/lib/client').types.defaultType;
+const util = require('../util');
+const promisify = util.promisify;
 
 export type QueryOptions = string | { [key: string]: unknown };
 
@@ -53,8 +53,8 @@ Model.prototype.query = function(collectionName: string, expression, options?: Q
  */
 Model.prototype._getOrCreateQuery = function(collectionName, expression, options, QueryConstructor) {
   expression = this.sanitizeQuery(expression);
-  var contextId = this._context.id;
-  var query = this.root._queries.get(contextId, collectionName, expression, options);
+  const contextId = this._context.id;
+  let query = this.root._queries.get(contextId, collectionName, expression, options);
   if (query) return query;
   query = new QueryConstructor(this, collectionName, expression, options);
   this.root._queries.add(query);
@@ -69,9 +69,9 @@ Model.prototype._getOrCreateQuery = function(collectionName, expression, options
 // stack error
 Model.prototype.sanitizeQuery = function(expression) {
   if (expression && typeof expression === 'object') {
-    for (var key in expression) {
-      if (expression.hasOwnProperty(key)) {
-        var value = expression[key];
+    for (const key in expression) {
+      if (Object.hasOwn(expression, key)) {
+        const value = expression[key];
         if (value === undefined) {
           expression[key] = null;
         } else {
@@ -104,7 +104,7 @@ Model.prototype._initQueries = function(items: any[][]) {
     query._setExtra(extra);
 
     const ids = [];
-    for (var resultIndex = 0; resultIndex < results.length; resultIndex++) {
+    for (let resultIndex = 0; resultIndex < results.length; resultIndex++) {
       const result = results[resultIndex];
       if (typeof result === 'string') {
         ids.push(result);
@@ -153,14 +153,14 @@ export class Queries {
   };
 
   get(contextId, collectionName, expression, options) {
-    var hash = queryHash(contextId, collectionName, expression, options);
+    const hash = queryHash(contextId, collectionName, expression, options);
     return this.map[hash];
   };
 
   toJSON() {
-    var out = [];
-    for (var hash in this.map) {
-      var query = this.map[hash];
+    const out = [];
+    for (const hash in this.map) {
+      const query = this.map[hash];
       if (query.subscribeCount || query.fetchCount) {
         out.push(query.serialize());
       }
@@ -227,7 +227,7 @@ export class Query<T = {}> {
   };
 
   destroy() {
-    var ids = this.getIds();
+    const ids = this.getIds();
     this.created = false;
     if (this.shareQuery) {
       this.shareQuery.destroy();
@@ -247,7 +247,7 @@ export class Query<T = {}> {
 
     if (!this.created) this.create();
 
-    var query = this;
+    const query = this;
     function fetchCb(err: Error, results: any[], extra?: string[]) {
       if (err) return cb(err);
       query._setExtra(extra);
@@ -270,9 +270,9 @@ export class Query<T = {}> {
     this.context.subscribeQuery(this);
 
     if (this.subscribeCount++) {
-      var query = this;
+      const query = this;
       process.nextTick(function() {
-        var data = query.model._get(query.segments);
+        const data = query.model._get(query.segments);
         if (data) {
           cb();
         } else {
@@ -284,7 +284,7 @@ export class Query<T = {}> {
 
     if (!this.created) this.create();
 
-    var options = (this.options) ? util.copy(this.options) : {};
+    const options = (this.options) ? util.copy(this.options) : {};
     options.results = this._getShareResults();
 
     // When doing server-side rendering, we actually do a fetch the first time
@@ -302,7 +302,7 @@ export class Query<T = {}> {
   subscribePromised = promisify(Query.prototype.subscribe);
 
   _subscribeCb(cb: ErrorCallback) {
-    var query = this;
+    const query = this;
     return function subscribeCb(err: Error, results: ShareDBDoc[], extra?: any) {
       if (err) return query._flushSubscribeCallbacks(err, cb);
       query._setExtra(extra);
@@ -321,7 +321,7 @@ export class Query<T = {}> {
   };
 
   _shareSubscribe(options, cb) {
-    var query = this;
+    const query = this;
     // Sanity check, though this shouldn't happen
     if (this.shareQuery) {
       this.shareQuery.destroy();
@@ -333,12 +333,12 @@ export class Query<T = {}> {
       this._subscribeCb(cb),
     );
     this.shareQuery.on('insert', function(shareDocs, index) {
-      var ids = resultsIds(shareDocs);
+      const ids = resultsIds(shareDocs);
       query._addMapIds(ids);
       query.model._insert(query.idsSegments, index, ids);
     });
     this.shareQuery.on('remove', function(shareDocs, index) {
-      var ids = resultsIds(shareDocs);
+      const ids = resultsIds(shareDocs);
       query._removeMapIds(ids);
       query.model._remove(query.idsSegments, index, shareDocs.length);
     });
@@ -354,8 +354,8 @@ export class Query<T = {}> {
   };
 
   _removeMapIds(ids) {
-    for (var i = ids.length; i--;) {
-      var id = ids[i];
+    for (let i = ids.length; i--;) {
+      const id = ids[i];
       if (this.idMap[id] > 1) {
         this.idMap[id]--;
       } else {
@@ -368,7 +368,7 @@ export class Query<T = {}> {
     // dealing with adds that might happen in the meantime. This will probably
     // work to avoid thrashing subscribe/unsubscribe in expected cases
     if (this.model.root.unloadDelay) {
-      var query = this;
+      const query = this;
       setTimeout(function() {
         query._maybeUnloadDocs(ids);
       }, this.model.root.unloadDelay);
@@ -377,22 +377,22 @@ export class Query<T = {}> {
     this._maybeUnloadDocs(ids);
   };
   _addMapIds(ids) {
-    for (var i = ids.length; i--;) {
-      var id = ids[i];
+    for (let i = ids.length; i--;) {
+      const id = ids[i];
       this.idMap[id] = (this.idMap[id] || 0) + 1;
     }
   };
   _diffMapIds(ids: string[]) {
-    var addedIds = [];
-    var removedIds = [];
-    var newMap = {};
-    for (var i = ids.length; i--;) {
-      var id = ids[i];
+    const addedIds = [];
+    const removedIds = [];
+    const newMap = {};
+    for (let i = ids.length; i--;) {
+      const id = ids[i];
       newMap[id] = true;
       if (this.idMap[id]) continue;
       addedIds.push(id);
     }
-    for (let id in this.idMap) {
+    for (const id in this.idMap) {
       if (newMap[id]) continue;
       removedIds.push(id);
     }
@@ -404,7 +404,7 @@ export class Query<T = {}> {
     this.model._setDiffDeep(this.extraSegments, extra);
   };
   _setResults(results: ShareDBDoc[]) {
-    var ids = resultsIds(results);
+    const ids = resultsIds(results);
     this._setResultIds(ids);
   };
   _setResultIds(ids: string[]) {
@@ -412,8 +412,8 @@ export class Query<T = {}> {
     this.model._setArrayDiff(this.idsSegments, ids);
   };
   _maybeUnloadDocs(ids) {
-    for (var i = 0; i < ids.length; i++) {
-      var id = ids[i];
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i];
       this.model._maybeUnloadDoc(this.collectionName, id);
     }
   };
@@ -423,7 +423,7 @@ export class Query<T = {}> {
   // be empty after this runs.
   _flushSubscribeCallbacks(err, cb) {
     cb(err);
-    var pendingCallback;
+    let pendingCallback;
     while ((pendingCallback = this._pendingSubscribeCallbacks.shift())) {
       pendingCallback(err);
     }
@@ -439,14 +439,14 @@ export class Query<T = {}> {
       return this;
     }
 
-    var query = this;
+    const query = this;
     if (this.model.root.unloadDelay) {
       setTimeout(finishUnfetchQuery, this.model.root.unloadDelay);
     } else {
       finishUnfetchQuery();
     }
     function finishUnfetchQuery() {
-      var count = --query.fetchCount;
+      const count = --query.fetchCount;
       if (count) return cb(null, count);
       // Cleanup when no fetches or subscribes remain
       if (!query.subscribeCount) query.destroy();
@@ -467,14 +467,14 @@ export class Query<T = {}> {
       return this;
     }
 
-    var query = this;
+    const query = this;
     if (this.model.root.unloadDelay) {
       setTimeout(finishUnsubscribeQuery, this.model.root.unloadDelay);
     } else {
       finishUnsubscribeQuery();
     }
     function finishUnsubscribeQuery() {
-      var count = --query.subscribeCount;
+      const count = --query.subscribeCount;
       if (count) return cb(null, count);
 
       if (query.shareQuery) {
@@ -496,35 +496,35 @@ export class Query<T = {}> {
   unsubscribePromised = promisify(Query.prototype.unsubscribe);
 
   _getShareResults() {
-    var ids = this.model._get(this.idsSegments);
+    const ids = this.model._get(this.idsSegments);
     if (!ids) return;
 
-    var collection = this.model.getCollection(this.collectionName);
+    const collection = this.model.getCollection(this.collectionName);
     if (!collection) return;
 
-    var results = [];
-    for (var i = 0; i < ids.length; i++) {
-      var id = ids[i];
-      var doc = collection.docs[id] as RemoteDoc;
+    const results = [];
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i];
+      const doc = collection.docs[id] as RemoteDoc;
       results.push(doc && doc.shareDoc);
     }
     return results;
   };
 
   get(): Array<T> {
-    var results = [];
-    var data = this.model._get(this.segments);
+    const results = [];
+    const data = this.model._get(this.segments);
     if (!data) {
       console.warn('You must fetch or subscribe to a query before getting its results.');
       return results;
     }
-    var ids = data.ids;
+    const ids = data.ids;
     if (!ids) return results;
 
-    var collection = this.model.getCollection(this.collectionName);
-    for (var i = 0, l = ids.length; i < l; i++) {
-      var id = ids[i];
-      var doc = (collection && collection.docs[id]) as RemoteDoc;
+    const collection = this.model.getCollection(this.collectionName);
+    for (let i = 0, l = ids.length; i < l; i++) {
+      const id = ids[i];
+      const doc = (collection && collection.docs[id]) as RemoteDoc;
       results.push(doc && doc.get());
     }
     return results;
@@ -539,34 +539,34 @@ export class Query<T = {}> {
   };
 
   ref(from) {
-    var idsPath = this.idsSegments.join('.');
+    const idsPath = this.idsSegments.join('.');
     return this.model.refList(from, this.collectionName, idsPath);
   };
 
   refIds(from) {
-    var idsPath = this.idsSegments.join('.');
+    const idsPath = this.idsSegments.join('.');
     return this.model.ref(from, idsPath);
   };
 
   refExtra(from, relPath?) {
-    var extraPath = this.extraSegments.join('.');
+    let extraPath = this.extraSegments.join('.');
     if (relPath) extraPath += '.' + relPath;
     return this.model.ref(from, extraPath);
   };
 
   serialize() {
-    var ids = this.getIds();
-    var collection = this.model.getCollection(this.collectionName);
-    var results;
+    const ids = this.getIds();
+    const collection = this.model.getCollection(this.collectionName);
+    let results;
     if (collection) {
       results = [];
-      for (var i = 0; i < ids.length; i++) {
-        var id = ids[i];
-        var doc = collection.docs[id] as RemoteDoc;
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        const doc = collection.docs[id] as RemoteDoc;
         if (doc) {
           delete collection.docs[id];
-          var data = doc.shareDoc.data;
-          var result = [data, doc.shareDoc.version];
+          const data = doc.shareDoc.data;
+          const result = [data, doc.shareDoc.version];
           if (!data || data.id !== id) {
             result[2] = id;
           }
@@ -579,17 +579,17 @@ export class Query<T = {}> {
         }
       }
     }
-    var subscribed = this.context.subscribedQueries[this.hash] || 0;
-    var fetched = this.context.fetchedQueries[this.hash] || 0;
-    var contextId = this.context.id;
-    var counts = (contextId === 'root') ?
+    const subscribed = this.context.subscribedQueries[this.hash] || 0;
+    const fetched = this.context.fetchedQueries[this.hash] || 0;
+    const contextId = this.context.id;
+    const counts = (contextId === 'root') ?
       (fetched === 0) ? [subscribed] : [subscribed, fetched] :
       [subscribed, fetched, contextId];
     // TODO: change counts to a less obtuse format. We don't want to change
     // the serialization format unless it is known that clients are not
     // depending on the old format, so this should be done in a major version
-    var countsList = [counts];
-    var serialized = [
+    const countsList = [counts];
+    const serialized = [
       countsList,
       this.collectionName,
       this.expression,
@@ -605,14 +605,14 @@ export class Query<T = {}> {
 }
 
 function queryHash(contextId, collectionName, expression, options) {
-  var args = [contextId, collectionName, expression, options];
+  const args = [contextId, collectionName, expression, options];
   return JSON.stringify(args).replace(/\./g, '|');
 }
 
 function resultsIds(results: { id: string }[]): string[] {
-  var ids = [];
-  for (var i = 0; i < results.length; i++) {
-    var shareDoc = results[i];
+  const ids = [];
+  for (let i = 0; i < results.length; i++) {
+    const shareDoc = results[i];
     ids.push(shareDoc.id);
   }
   return ids;

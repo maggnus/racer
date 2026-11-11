@@ -1,15 +1,15 @@
 import { Connection } from 'sharedb/lib/client';
 import { Model } from './Model';
-import { type Doc} from './Doc';
 import { LocalDoc} from './LocalDoc';
 import {RemoteDoc} from './RemoteDoc';
 import type Agent = require('sharedb/lib/agent');
-var promisify = require('../util').promisify;
+const promisify = require('../util').promisify;
 
 export { type Connection };
 
 declare module './Model' {
   interface DocConstructor {
+    // eslint-disable-next-line @typescript-eslint/no-misused-new
     new (any: unknown[]): DocConstructor;
   }
   interface Model<T> {
@@ -51,13 +51,13 @@ Model.INITS.push(function(model) {
 });
 
 Model.prototype.preventCompose = function() {
-  var model = this._child();
+  const model = this._child();
   model._preventCompose = true;
   return model;
 };
 
 Model.prototype.allowCompose = function() {
-  var model = this._child();
+  const model = this._child();
   model._preventCompose = false;
   return model;
 };
@@ -68,7 +68,7 @@ Model.prototype.createConnection = function(bundle) {
 
   // The Share connection will bind to the socket by defining the onopen,
   // onmessage, etc. methods
-  var model = this;
+  const model = this;
   this.root.connection = new Connection(this.root.socket);
   this.root.connection.on('state', function(state, reason) {
     model._setDiff(['$connection', 'state'], state);
@@ -80,7 +80,7 @@ Model.prototype.createConnection = function(bundle) {
 };
 
 Model.prototype._finishCreateConnection = function() {
-  var model = this;
+  const model = this;
   this.root.connection.on('error', function(err) {
     model._emitError(err);
   });
@@ -107,7 +107,7 @@ Model.prototype.reconnect = function() {
 // Clean delayed disconnect
 Model.prototype.close = function(cb) {
   cb = this.wrapCallback(cb);
-  var model = this;
+  const model = this;
   this.whenNothingPending(function() {
     model.root.socket.close();
     cb();
@@ -128,7 +128,7 @@ Model.prototype._isLocal = function(name) {
   // Collections starting with an underscore ('_') are for user-defined local
   // collections, those starting with a dollar sign ('$'') are for
   // framework-defined local collections, and all others are remote.
-  var firstCharcter = name.charAt(0);
+  const firstCharcter = name.charAt(0);
   return firstCharcter === '_' || firstCharcter === '$';
 };
 
