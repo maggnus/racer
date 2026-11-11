@@ -2,6 +2,9 @@
   "compilerOptions": {
     "allowJs": true,
     "strict": false,
+    // Fields that are only declared must not be defined on the instance. Base class constructors set
+    // properties that a subclass declares again, and they would be overwritten with undefined.
+    "useDefineForClassFields": false,
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "node16",
