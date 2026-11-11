@@ -1,50 +1,31 @@
-# https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs-or-python
-
-
 name: Test
 
 on:
   push:
-    branches:
-    - master
   pull_request:
-    branches:
-    - master
 
 jobs:
   test:
-    name: Node.js ${{ matrix.node }}
+    name: Node.js ${{ matrix.node }}, ShareDB ${{ matrix.sharedb }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
+      fail-fast: false
       matrix:
-        node:
-        - 16
-        - 18
-        - 20
-    timeout-minutes: 5
+        node: [22, 24, 26]
+        sharedb: [7]
+        include:
+          - { node: 24, sharedb: 4 }
+          - { node: 24, sharedb: 5 }
+          - { node: 24, sharedb: 6 }
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
-      with:
-        node-version: ${{ matrix.node }}
-    - run: npm install
-    - run: npm run lint
-      if: ${{ matrix.node >= 12 }}  # eslint@8 only supports Node >= 12
-    - run: npm run test-cover
-    # https://github.com/marketplace/actions/coveralls-github-action#complete-parallel-job-example
-    - name: Coveralls
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        flag-name: node-${{ matrix.node }}
-        parallel: true
-
-  finish:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Submit coverage
-        uses: coverallsapp/github-action@master
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel-finished: true
+          node-version: ${{ matrix.node }}
+      - run: npm install
+      - run: npm run lint
+      - run: npm run build
+      # The peer dependency is installed last, to test against each supported major version
+      - run: npm install --no-save sharedb@${{ matrix.sharedb }}
+      - run: npm run test-cover

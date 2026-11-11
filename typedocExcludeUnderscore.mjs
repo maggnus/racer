@@ -1,5 +1,4 @@
-import { Converter, ReflectionFlag, ReflectionKind } from "typedoc";
-import camelCase from "camelcase";
+import { Converter, ReflectionFlag } from "typedoc";
 
 /**
  * @param {Readonly<import('typedoc').Application>} app

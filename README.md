@@ -32,18 +32,19 @@ There are currently two demos, which are included in the [racer-examples](https:
 
 ## Installation
 
-Racer requires [Node v16](http://nodejs.org/). You will also need to have a [MongoDB](http://docs.mongodb.org/manual/installation/) and a [Redis](http://redis.io/download) server running on your machine. The examples will connect via the default configurations.
+Racer requires Node.js 22 or newer and [ShareDB](https://github.com/share/sharedb), which is a peer dependency. ShareDB 4, 5, 6 and 7 are supported.
 
-```
-$ npm install racer
+```sh
+npm install racer sharedb
 ```
 
 ## Tests
 
-Run the tests with
-
-```
-$ npm test
+```sh
+npm install
+npm test         # builds, then runs the tests with Mocha
+npm run lint
+npm run docs     # generates the API documentation in docs/
 ```
 
 ## Usage
@@ -52,24 +53,6 @@ Racer can be used independently as shown in the examples, but Racer and Derby ar
 
 For now, Racer is mostly documented along with Derby. See the Derby [model docs](https://derbyjs.github.io/derby/models).
 
-### MIT License
-Copyright (c) 2024 by Brian Noguchi and Nate Smith
+## License
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
+MIT, see [LICENSE](LICENSE).
